@@ -69,5 +69,51 @@ def create_book():
         "book": new_book
     }), 201
 
+
+# 4. PUT: Memperbarui data buku berdasarkan ID (Status: 200 / 400 / 404)
+@app.route('/api/books/<int:book_id>', methods=['PUT'])
+def update_book(book_id):
+    # Mencari buku berdasarkan ID
+    book = next((b for b in books if b['id'] == book_id), None)
+
+    if not book:
+        return jsonify({"message": "Buku tidak ditemukan"}), 404
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"message": "Data harus berupa JSON"}), 400
+
+    required_fields = ['title', 'author', 'year', 'stock']
+
+    # PUT meminta seluruh field dikirim
+    if not all(field in data for field in required_fields):
+        return jsonify({
+            "message": "Field title, author, year, dan stock wajib diisi"
+        }), 400
+
+    # Validasi tipe dan isi data
+    if (
+        not isinstance(data['title'], str)
+        or not data['title'].strip()
+        or not isinstance(data['author'], str)
+        or not data['author'].strip()
+        or type(data['year']) is not int
+        or type(data['stock']) is not int
+        or data['stock'] < 0
+    ):
+        return jsonify({"message": "Data buku tidak valid"}), 400
+
+    # Memperbarui data buku yang ditemukan
+    book['title'] = data['title'].strip()
+    book['author'] = data['author'].strip()
+    book['year'] = data['year']
+    book['stock'] = data['stock']
+
+    return jsonify({
+        "message": "Buku berhasil diperbarui",
+        "book": book
+    }), 200
+
 if __name__ == '__main__':
     app.run(debug=True, port=3000)
