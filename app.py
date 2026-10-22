@@ -115,5 +115,24 @@ def update_book(book_id):
         "book": book
     }), 200
 
+
+# 5. DELETE: Menghapus buku berdasarkan ID (Status: 200 / 404)
+@app.route('/api/books/<int:book_id>', methods=['DELETE'])
+def delete_book(book_id):
+    # Mencari buku berdasarkan ID
+    book = next((b for b in books if b['id'] == book_id), None)
+
+    # Jika buku tidak ditemukan
+    if not book:
+        return jsonify({"message": "Buku tidak ditemukan"}), 404
+
+    # Menghapus buku dari daftar
+    books.remove(book)
+
+    return jsonify({
+        "message": "Buku berhasil dihapus",
+        "book": book
+    }), 200
+
 if __name__ == '__main__':
     app.run(debug=True, port=3000)
